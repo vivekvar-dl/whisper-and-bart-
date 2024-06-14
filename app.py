@@ -13,22 +13,18 @@ from moviepy.editor import VideoFileClip
 import tempfile
 import altair as alt
 
-# Load pre-trained models and processors
+# Loading pre-trained
 whisper_processor = WhisperProcessor.from_pretrained("openai/whisper-base")
 whisper_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-base")
 rag_tokenizer = RagTokenizer.from_pretrained("facebook/rag-sequence-nq")
 rag_retriever = RagRetriever.from_pretrained("facebook/rag-sequence-nq", index_name="exact", use_dummy_dataset=True)
 rag_model = RagSequenceForGeneration.from_pretrained("facebook/rag-sequence-nq", retriever=rag_retriever)
-
-# Function to transcribe audio
 def transcribe_audio(audio_path, language="en"): 
     speech, _ = librosa.load(audio_path, sr=16000)
     input_features = whisper_processor(speech, return_tensors="pt", sampling_rate=16000).input_features
     predicted_ids = whisper_model.generate(input_features)
     transcription = whisper_processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
     return transcription
-
-# Function to translate and summarize text (simplified for demonstration)
 def translate_and_summarize(text):
     input_ids = rag_tokenizer(text, return_tensors="pt").input_ids
     output_ids = rag_model.generate(input_ids)
@@ -41,14 +37,13 @@ def extract_audio_from_video(video_path, output_audio_path):
     if video.audio:
         video.audio.write_audiofile(output_audio_path)
         return output_audio_path
-
 # Streamlit App
 st.title("Audio & Video Transcription with Summarization")
 
 # Audio Transcription Section
 st.header("Transcribe Audio")
 audio_file = st.file_uploader("Upload Audio File", type=["wav", "mp3", "m4a"])
-language = st.selectbox("Select Language", ["en", "ru", "es", "fr", "de"])  # Add more languages as needed
+language = st.selectbox("Select Language", ["en", "ru", "es", "fr", "de"])  
 
 if audio_file:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_audio:
@@ -59,12 +54,10 @@ if audio_file:
         st.subheader("Transcription:")
         st.write(transcription)
         with st.spinner("Summarizing..."):
-            summary = translate_and_summarize(transcription)  # Replace with more robust summarization logic
+            summary = translate_and_summarize(transcription) 
         st.subheader("Summary:")
         st.write(summary)
-
-
-# Video Transcription Section
+# Video Transcription n
 st.header("Transcribe Video")
 video_file = st.file_uploader("Upload Video File", type=["mp4", "mov"])
 
